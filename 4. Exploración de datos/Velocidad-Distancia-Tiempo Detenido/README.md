@@ -19,8 +19,6 @@ library(dplyr)
 library(ggplot2)
 library(DescTools)
 ```
-
-
 ### Preparación de los datos
 ```R
 #leer los datos
@@ -76,24 +74,7 @@ datosF2[datosF2=="Taxi Libre"]<-"Taxi";
 datosF2[datosF2=="Taxi de Sitio"]<-"Taxi";
 ```
 
-Así como tambien, creamos otros dos dataframes, con los datos individualmente ya divididos, para analizar su comportamiento de manera independiente.
-
-```R
-#Crear una copia para manipular
-datosF2<-datosF
-
-#Agrupar los datos en dos grupos
-datosF2[datosF2=="UberX"]<-"Uber";
-datosF2[datosF2=="UberBlack"]<-"Uber";
-datosF2[datosF2=="UberXL"]<-"Uber";
-datosF2[datosF2=="UberSUV"]<-"Uber";
-
-datosF2[datosF2=="Radio Taxi"]<-"Taxi";
-datosF2[datosF2=="Taxi Libre"]<-"Taxi";
-datosF2[datosF2=="Taxi de Sitio"]<-"Taxi";
-```
-
-Una vez organizados los datos, empezamos a analizar cada una de las caracteristicas que nos interesa conocer, Tiempo que pasan en promedio en el trafico (wait_seconds) en general
+Así como tambien, creamos otros dos dataframes, con los datos ya divididos, para analizar su comportamiento de manera independiente.
 
 ```R
 #Agrupamos juntos todos los tipos de Uber
@@ -108,3 +89,92 @@ datosTaxi <- filter(datosF,Transporte %in% target)
 datosTaxi;
 dim(datosTaxi);
 ```
+
+Una vez organizados los datos, empezamos a analizar cada una de las caracteristicas que nos interesa conocer, Tiempo que pasan en promedio en el trafico (wait_seconds) en general
+```R
+#TIEMPOS DE ESPERA EN EL TRAFICO
+summary(datosF2$wait_sec);
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#0.0    84.0   190.0   354.8   397.0  8662.0 
+
+IQR(datosF2$wait_sec); #313
+84.0 - (1.5 *IQR(datosF2$wait_sec));  # -385.5
+397.0 + (1.5 *IQR(datosF2$wait_sec)); # 866.5
+
+datosFWait<-filter(datosF2, wait_sec <= 866.5) # Quitamos los outlayers
+
+datosFWait %>%
+  ggplot() + 
+  aes(wait_sec) +
+  geom_histogram(binwidth = 200, col="black", fill = "blue") + 
+  ggtitle("PROMEDIO DE LOS TIEMPOS DE ESPERA GENERAL") +
+  ylab("Frecuencia") +
+  xlab("Tiempo del viaje en que estuvo completamente detenido (segundos)") + 
+  theme_light();
+dev.off();
+```
+Resultado
+
+![PCTABLA](https://github.com/DavidGilP/Proyecto_R_Transporte_CDMX/blob/main/4.%20Exploraci%C3%B3n%20de%20datos/Velocidad-Distancia-Tiempo%20Detenido/Graficos/PromTiemposEsperaViajes_General1.png)
+
+
+Observamos como los tiempos que esta completamente detenido el auto estan sesgados a  la izquierda.
+Ahora graficamos esta comparacion entre ellos.
+
+```R
+#wait_sec
+grupoTaxiUberWS <- datosF2 %>%
+  group_by(Transporte,wait_sec ) %>%
+  dplyr::summarize(Total = n());
+
+ #wait_sec
+ggplot(grupoTaxiUberWS, aes(wait_sec, Total, fill = Transporte)) + 
+  geom_bar( stat = "identity") +
+  ggtitle("Viajes por tiempo detenido y por Tipo Transporte") +
+  scale_y_continuous(labels = comma) +
+    xlim(0,866.5); #866.5 = 1.5*IR   
+```
+
+Resultado
+
+![PCTABLA](https://github.com/DavidGilP/Proyecto_R_Transporte_CDMX/blob/main/4.%20Exploraci%C3%B3n%20de%20datos/Velocidad-Distancia-Tiempo%20Detenido/Graficos/TiempoDetenido_PorViajesGeneral1.png)
+
+Observamos que aunque de manera similar, la frecuencia de ambos grupos estan sesgados a la izquiera,  los datos de Uber, estan menos desplazamos a lo largo de gráfica.
+Igualmente, esta interpretacion la veremos con datos analizando la distribucion de los datos, en los dos grupos previamente creados.
+
+```R
+################### TAXI ###################
+summary(datosTaxi$wait_sec);
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#0.0    84.0   190.0   350.6   397.0  8662.0 
+
+IQR(datosTaxi$wait_sec); #313
+84.0 - (1.5 *IQR(datosTaxi$wait_sec));  # -385.5
+397.0 + (1.5 *IQR(datosTaxi$wait_sec)); # 866.5
+
+################### UBER ###################
+summary(datosUber$wait_sec);
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#0.0    64.0   162.0   572.5   359.0  7498.0
+
+IQR(datosUber$wait_sec); #295
+64.0 - (1.5 *IQR(datosUber$wait_sec));  # -378.5
+359.0 + (1.5 *IQR(datosUber$wait_sec)); # 801.5
+```
+
+Procedemos a hacer la comparacion, ahora elimando los outlayers de los datos
+```R
+datosTaxiF<-filter(datosTaxi, wait_sec <= 866.5) #
+datosUberF<-filter(datosUber, wait_sec <= 801.5) # 
+
+################### TAXI ###################
+summary(datosTaxiF$wait_sec);
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#0.0    78.0   169.0   229.1   324.0   866.0 
+################### UBER ###################
+summary(datosUberF$wait_sec);
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#0.00   52.75  114.50  172.19  254.25  745.00 
+```
+#### Conclusion
+Por lo cual, aceptamos la hipotesis nula, la cual confirma nuestra suposicion de que en general, los conductores de Uber pasan menos tiempo en el trafico.
