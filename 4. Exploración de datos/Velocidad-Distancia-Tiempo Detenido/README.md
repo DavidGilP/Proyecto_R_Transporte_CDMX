@@ -18,6 +18,11 @@ Para medir el el tiempo que el vehiculo paso detenido en el trafico se usa la co
 library(dplyr)
 library(ggplot2)
 library(DescTools)
+library(ggthemes);
+library(lubridate);
+library(tidyr);
+library(DT);
+library(scales);
 ```
 ### Preparación de los datos
 ```R
