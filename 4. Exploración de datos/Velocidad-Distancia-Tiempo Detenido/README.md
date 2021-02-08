@@ -219,8 +219,38 @@ datosF2 %>%
   ylab("Frecuencia") +
   xlab("Distancia de viaje (mts)") +
   theme_light();
+ ```
  
+Resultado
+
+![PCTABLA](https://github.com/DavidGilP/Proyecto_R_Transporte_CDMX/blob/main/4.%20Exploraci%C3%B3n%20de%20datos/Velocidad-Distancia-Tiempo%20Detenido/Graficos/Distancia_PromedioPorViajesGeneral2.png)
+
+Observamos como las distancias promedio parecen estar un poco sesgadas a la izquierda.
+Ahora graficamos esta comparacion entre ellos
+
+```R
+#dist meters
+grupoTaxiUberDm <- datosFV %>%
+  group_by(Transporte,Vel_km_hr ) %>%
+  dplyr::summarize(Total = n());
+
+#dist meters
+ggplot(grupoTaxiUberDm, aes(Vel_km_hr, Total, fill = Transporte)) + 
+  geom_bar( stat = "identity") +
+  #  geom_bar(stat = "identity", width = 500,colour="black") +
+  #  theme_bw() +
+  ggtitle("Viajes por distancia y por Tipo de Transporte") +
+scale_y_continuous(labels = comma) +
+#  ylim(0,3)+
+  xlim(0,34);
+dev.off();
 ```
+
+Resultado
+
+![PCTABLA](https://github.com/DavidGilP/Proyecto_R_Transporte_CDMX/blob/main/4.%20Exploraci%C3%B3n%20de%20datos/Velocidad-Distancia-Tiempo%20Detenido/Graficos/Distancia_PorViajesGeneral1.png)
+
+
 Ahora analizamos por separado los datos de los Taxis y Uber
 
 ```R
@@ -298,7 +328,7 @@ Resultado
 
 
 
-Observamos como los tiempos que esta completamente detenido el auto estan sesgados a  la izquierda.
+Observamos como las velocidades promedio parecen estar relativamente distribuidas de manera uniforme.
 Ahora graficamos esta comparacion entre ellos.
 ```R
 #velocidad
