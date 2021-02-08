@@ -1,6 +1,8 @@
 
 # Exploración de datos - Análisis de Distancias, Tiempos de espera en el trafico y Velocidad
 
+## Exploración de datos - Análisis de Tiempos de espera en el trafico
+
 En este análisis se buscaron las relaciones entre las diferentes variables (como la distancias promedio de los viajes y el tipo de transporte) 
 y la cantidad de viajes hechos y la velocidad promedio alcanzada en cada viaje.
 
@@ -183,3 +185,69 @@ summary(datosUberF$wait_sec);
 ```
 #### Conclusion
 Por lo cual, aceptamos la hipotesis nula, la cual confirma nuestra suposicion de que en general, los conductores de Uber pasan menos tiempo en el trafico.
+
+
+
+## Exploración de datos - Análisis de Tiempos de espera en el trafico
+
+
+Para medir las distancias entre que recorren los vehiculos en sus viajes se usa la columna "dist_meters", esta indica la distancia recorrida por el vehículo durante el trayecto.
+Partiendo del dataframe principal anterior tenememos
+```R
+datos <-  read.csv("cdmx_rutas_municipiosVel.csv", header = T)
+datosF<-select(datos, Transporte,trip_duration,trip_duration_hrs,dist_meters,dist_km,wait_sec,wait_min,
+               Vel_mts_seg ,Vel_km_hr);
+
+#DISTANCIA VIAJE
+summary(datosF2$dist_meters);
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 500    1835    3154    3642    5101    9130 
+#Mode(datosF$dist_meters);
+
+IQR(datosF$dist_meters); #3393.5
+1835 - (1.5 *IQR(datosF2$dist_meters));  # -3064
+5101 + (1.5 *IQR(datosF2$dist_meters)); # 10000
+```
+Como los datos estan dentro del rango intercuartilico, no hay necesidad de hacer algun ajuste
+
+```R
+datosF2 %>%
+  ggplot() + 
+  aes(dist_meters) +
+  geom_histogram(binwidth = 1000, col="black", fill = "blue") +
+  ggtitle("PROMEDIO DE DISTANCIA DE LOS VIAJES EN GENERAL") +
+  ylab("Frecuencia") +
+  xlab("Distancia de viaje (mts)") +
+  theme_light();
+ 
+```
+Ahora analizamos por separado los datos de los Taxis y Uber
+
+```R
+target <- c("Taxi de Sitio","Taxi Libre","Radio Taxi")
+datosTaxi <- filter(datosF,Transporte %in% target)
+datosTaxi;
+#DISTANCIA VIAJE
+summary(datosTaxi$dist_meters);
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 500    1847    3164    3645    5098    9130
+
+IQR(datosTaxi$dist_meters); #3251
+1847 - (1.5 *IQR(datosTaxi$dist_meters));  # -3029.5
+5098 + (1.5 *IQR(datosTaxi$dist_meters)); # 9974.5
+
+------------------------------------------------------------------------------
+
+target <- c("UberX","UberBlack","UberXL","Ube rSUV")
+datosUber <- filter(datosF,Transporte %in% target)
+datosUber;
+#DISTANCIA VIAJE
+summary(datosUber$dist_meters);
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#515    1222    2522    3256    4273    9061 
+
+IQR(datosUber$dist_meters); #3050.5
+1222 - (1.5 *IQR(datosUber$dist_meters));  # -3353.75
+4273 + (1.5 *IQR(datosUber$dist_meters)); # 8848.75
+
+```
