@@ -288,8 +288,41 @@ datosFV %>%
   ylab("Frecuencia") +
   xlab("Velocidad Promedio en el viaje (km/h)") +
   theme_light();
-  
 ```
+
+Resultado
+
+![PCTABLA](https://github.com/DavidGilP/Proyecto_R_Transporte_CDMX/blob/main/4.%20Exploraci%C3%B3n%20de%20datos/Velocidad-Distancia-Tiempo%20Detenido/Graficos/Velocidad_PromedioPorViajesGeneral2.png)
+
+![PCTABLA](https://github.com/DavidGilP/Proyecto_R_Transporte_CDMX/blob/main/4.%20Exploraci%C3%B3n%20de%20datos/Velocidad-Distancia-Tiempo%20Detenido/Graficos/Velocidad_PromedioPorViajesGeneral3.png)
+
+
+
+Observamos como los tiempos que esta completamente detenido el auto estan sesgados a  la izquierda.
+Ahora graficamos esta comparacion entre ellos.
+```R
+#velocidad
+grupoTaxiUberDm <- datosTaxiF %>%
+  group_by(Transporte,Vel_km_hr ) %>%
+  dplyr::summarize(Total = n());
+
+
+#velocidad
+ggplot(grupoTaxiUberDm, aes(Vel_km_hr, Total, fill = Transporte)) + 
+  geom_bar( stat = "identity") +
+  #  geom_bar(stat = "identity", width = 500,colour="black") +
+  #  theme_bw() +
+  ggtitle("Velocidad promedio Taxi") +
+  scale_y_continuous(labels = comma) +
+  #ylim(0,3)+
+  xlim(0,34);
+```
+
+Resultado
+
+![PCTABLA](https://github.com/DavidGilP/Proyecto_R_Transporte_CDMX/blob/main/4.%20Exploraci%C3%B3n%20de%20datos/Velocidad-Distancia-Tiempo%20Detenido/Graficos/velocidad_PorViajesGeneral1.png)
+
+
 Ahora analizamos por separado los datos de los Taxis y Uber
 ```R
 target <- c("Taxi de Sitio","Taxi Libre","Radio Taxi")
